@@ -10,4 +10,5 @@ public interface YankiService {
     public Mono<YankiEntity> save(YankiEntity colEnt);
     public Mono<YankiEntity> update(String documentNumber, String email);
     public Mono<Void> delete(String documentNumber);
+    public void publishToTopic(String debitCardNumber, String type, Double amount) ;
 }

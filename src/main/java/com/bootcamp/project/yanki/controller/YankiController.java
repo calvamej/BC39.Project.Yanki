@@ -35,4 +35,8 @@ public class YankiController {
     public Mono<Void> Delete(@PathVariable("documentNumber") String documentNumber){
         return clientService.delete(documentNumber);
     }
+    @PostMapping(value="/Post")
+    public void sendMessage(@RequestParam("debitCardNumber") String debitCardNumber,@RequestParam("type") String type,@RequestParam("amount") Double amount  ) {
+        clientService.publishToTopic(debitCardNumber,type,amount);
+    }
 }

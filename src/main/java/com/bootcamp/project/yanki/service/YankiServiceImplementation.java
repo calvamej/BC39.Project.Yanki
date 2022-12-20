@@ -1,9 +1,11 @@
 package com.bootcamp.project.yanki.service;
 
+import com.bootcamp.project.yanki.entity.YankiDTO;
 import com.bootcamp.project.yanki.entity.YankiEntity;
 import com.bootcamp.project.yanki.exception.CustomNotFoundException;
 import com.bootcamp.project.yanki.repository.YankiRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -12,6 +14,12 @@ import java.util.Date;
 
 @Service
 public class YankiServiceImplementation implements YankiService {
+
+    public static final String topic = "mytopic";
+
+    @Autowired
+    private KafkaTemplate<String, YankiDTO> kafkaTemp;
+
     @Autowired
     private YankiRepository yankiRepository;
 
@@ -46,5 +54,13 @@ public class YankiServiceImplementation implements YankiService {
                 .flatMap(c -> {
                     return yankiRepository.delete(c);
                 });
+    }
+    @Override
+    public void publishToTopic(String debitCardNumber, String type, Double amount) {
+        YankiDTO yankiDTO = new YankiDTO();
+        yankiDTO.setDebitCardNumber(debitCardNumber);
+        yankiDTO.setType(type);
+        yankiDTO.setAmount(amount);
+        this.kafkaTemp.send(topic, yankiDTO);
     }
 }
