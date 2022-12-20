@@ -21,9 +21,9 @@ public class YankiEntity {
     private String name;
     private String lastname;
     private String mobileNumber;
+    private String imei;
     private String email;
-    private String debitCard;
-    private double balance;
+    private String debitCardNumber;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private Date createDate;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")

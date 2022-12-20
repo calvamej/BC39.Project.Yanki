@@ -25,7 +25,7 @@ public class YankiServiceImplementation implements YankiService {
 
     @Override
     public Flux<YankiEntity> getAll() {
-        return yankiRepository.findAll().switchIfEmpty(Mono.error(new CustomNotFoundException("Clients not found")));
+        return yankiRepository.findAll().switchIfEmpty(Mono.error(new CustomNotFoundException("Yankis not found")));
     }
     @Override
     public Mono<YankiEntity> getOne(String documentNumber) {
@@ -44,16 +44,44 @@ public class YankiServiceImplementation implements YankiService {
             c.setEmail(email);
             c.setModifyDate(new Date());
             return yankiRepository.save(c);
-        }).switchIfEmpty(Mono.error(new CustomNotFoundException("Client not found")));
+        }).switchIfEmpty(Mono.error(new CustomNotFoundException("Yanki not found")));
     }
 
     @Override
     public Mono<Void> delete(String documentNumber) {
         return getOne(documentNumber)
-                .switchIfEmpty(Mono.error(new CustomNotFoundException("Client not found")))
+                .switchIfEmpty(Mono.error(new CustomNotFoundException("Yanki not found")))
                 .flatMap(c -> {
                     return yankiRepository.delete(c);
                 });
+    }
+    public Mono<YankiEntity> register(YankiEntity colEnt)
+    {
+        if(colEnt.getDocumentNumber() == null || colEnt.getMobileNumber() == null || colEnt.getImei() == null || colEnt.getEmail() == null)
+        {
+            return Mono.error(new CustomNotFoundException("The following fields are mandatory: Document Number, Mobile Number, IMEI and Email."));
+        }
+        colEnt.setCreateDate(new Date());
+        return getOne(colEnt.getDocumentNumber())
+                .switchIfEmpty(yankiRepository.save(colEnt));
+    }
+    @Override
+    public Mono<Boolean> checkDebitCardMainAccount(String debitCardNumber)
+    {
+        return yankiRepository.findAll().filter(x -> x.getDebitCardNumber() != null && x.getDebitCardNumber().equals(debitCardNumber)).hasElements();
+    }
+    @Override
+    public Mono<YankiEntity> linkDebitCard(String documentNumber, String debitCardNumber)
+    {
+        return getOne(documentNumber).flatMap(c -> checkDebitCardMainAccount(debitCardNumber).flatMap(x -> {
+            if (x) {
+                return Mono.error(new CustomNotFoundException("The Debit Card Number has already a Yanki account associated."));
+            } else {
+                c.setDebitCardNumber(debitCardNumber);
+                c.setModifyDate(new Date());
+                return yankiRepository.save(c);
+            }
+        })).switchIfEmpty(Mono.error(new CustomNotFoundException("The client does not have a Yanki account")));
     }
     @Override
     public void publishToTopic(String debitCardNumber, String type, Double amount) {

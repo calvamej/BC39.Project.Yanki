@@ -35,6 +35,15 @@ public class YankiController {
     public Mono<Void> Delete(@PathVariable("documentNumber") String documentNumber){
         return clientService.delete(documentNumber);
     }
+    @PostMapping(value = "/Register")
+    public Mono<YankiEntity> register(@RequestBody YankiEntity col){
+
+        return clientService.register(col);
+    }
+    @PutMapping(value = "/LinkDebitCard/{documentNumber}/{debitCardNumber}")
+    public Mono<YankiEntity> linkDebitCard(@PathVariable("documentNumber") String documentNumber,@PathVariable("debitCardNumber") String debitCardNumber){
+        return clientService.linkDebitCard(documentNumber,debitCardNumber);
+    }
     @PostMapping(value="/Post")
     public void sendMessage(@RequestParam("debitCardNumber") String debitCardNumber,@RequestParam("type") String type,@RequestParam("amount") Double amount  ) {
         clientService.publishToTopic(debitCardNumber,type,amount);
