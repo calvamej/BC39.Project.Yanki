@@ -62,7 +62,7 @@ public class YankiControllerImplementationTest {
     @Test
     public void getOne()
     {
-        YankiEntity OE = new YankiEntity(null,"AAA",null,null,null,null,null,null,0,null,null);
+        YankiEntity OE = new YankiEntity(null,"AAA",null,null,null,null,null,null,null,null,null);
         Mono<YankiEntity> MTest = Mono.just(OE);
         when(yankiService.getOne(any())).thenReturn(MTest);
         Flux<YankiEntity> responseBody = webTestClient.get().uri("/Yanki/FindOne/AAA")
@@ -79,8 +79,8 @@ public class YankiControllerImplementationTest {
     @Test
     public void getAll()
     {
-        YankiEntity OE = new YankiEntity(null,"AAA",null,null,null,null,null,null,0,null,null);
-        YankiEntity OE2 = new YankiEntity(null,"BBB",null,null,null,null,null,null,0,null,null);
+        YankiEntity OE = new YankiEntity(null,"AAA",null,null,null,null,null,null,null,null,null);
+        YankiEntity OE2 = new YankiEntity(null,"BBB",null,null,null,null,null,null,null,null,null);
         Flux<YankiEntity> MTest = Flux.just(OE,OE2);
         when(yankiService.getAll()).thenReturn(MTest);
         Flux<YankiEntity> responseBody = webTestClient.get().uri("/Yanki/FindAll")
