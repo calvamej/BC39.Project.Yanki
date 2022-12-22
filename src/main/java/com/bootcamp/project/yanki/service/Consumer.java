@@ -12,6 +12,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class Consumer {
@@ -28,22 +29,22 @@ public class Consumer {
 	public void consumeFromTopic(BootcoinOperationDTO operationDTO) {
 		try
 		{
-			YankiEntity entityPetitioner = new YankiEntity();
-			YankiEntity entitySeller = new YankiEntity();
 			String mensaje = "";
 			if(operationDTO.getPaymentMethod().toUpperCase().equals("YANKI"))
 			{
-				entityPetitioner = getAccount(operationDTO.getPetitionerDocumentNumber());
-				entitySeller = getAccount(operationDTO.getSellerDocumentNumber());
-				if(entityPetitioner == null || entitySeller == null)
+				List<YankiEntity> entityPetitioner = getAccount(operationDTO.getPetitionerDocumentNumber());
+				List<YankiEntity> entitySeller = getAccount(operationDTO.getSellerDocumentNumber());
+				if(entityPetitioner.size() > 0 && entitySeller.size() > 0)
 				{
-					mensaje = "Petitioner or seller does not have a YANKI account.";
+					mensaje = "Publishing to topic";
 					System.out.println(mensaje);
+					publishToTopic(entityPetitioner.get(0).getDebitCardNumber(),"SEND", operationDTO.getAmount());
+					publishToTopic(entitySeller.get(0).getDebitCardNumber(),"RECEIVE", operationDTO.getAmount());
 				}
 				else
 				{
-					publishToTopic(entityPetitioner.getDebitCardNumber(),"SEND", operationDTO.getAmount());
-					publishToTopic(entitySeller.getDebitCardNumber(),"RECEIVE", operationDTO.getAmount());
+					mensaje = "Petitioner or seller does not have a YANKI account.";
+					System.out.println(mensaje);
 				}
 			}
 			else
@@ -57,11 +58,11 @@ public class Consumer {
 
 		}
 	}
-	public YankiEntity getAccount(String documentNumber)
+	public List<YankiEntity> getAccount(String documentNumber)
 	{
 		Query query = new Query();
 		query.addCriteria(Criteria.where("documentNumber").is(documentNumber));
-		return mongoTemplate.findOne(query, YankiEntity.class);
+		return mongoTemplate.find(query, YankiEntity.class,"Yanki");
 	}
 	public void publishToTopic(String debitCardNumber, String type, Double amount) {
 		YankiDTO yankiDTO = new YankiDTO();
